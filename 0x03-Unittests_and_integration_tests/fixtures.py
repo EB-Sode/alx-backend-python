@@ -951,8 +951,6 @@ TEST_PAYLOAD = [
   )
 ]
 
-# fixtures.py
-
 org_payload = {
     "login": "google",
     "id": 1342004,
