@@ -21,7 +21,8 @@ class TestAccessNestedMap(unittest.TestCase):
         '''Test access_nested_map exception when path is invalid'''
         with self.assertRaises(expected):
             access_nested_map(nested_map, path)
-    '''parameterized runs thesame test with different inputs'''
+
+        # parameterized runs thesame test with different inputs
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a", "b"), 2),
@@ -35,8 +36,8 @@ class TestAccessNestedMap(unittest.TestCase):
 class TestGetJson(unittest.TestCase):
     '''Test get_json function to check utils.py'''
     @parameterized.expand([
-        {"test_url": "http://example.com", "test_payload": {"payload": True}},
-        {"test_url": "http://holberton.io", "test_payload": {"payload": False}}
+        ("http://example.com", {"payload": True}),
+        ("http://holberton.io", {"payload": False}),
     ])
     def test_get_json(self, test_url, test_payload):
         '''Test get_json with different URLs and payloads'''
