@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""
+Unit and integration tests for the GithubOrgClient class.
+
+This module contains unittests and integration tests for client.py.
+It uses mocks, parameterized tests, and fixtures to validate functionality.
+"""
 import unittest
 from unittest.mock import patch
 from utils import access_nested_map, get_json, memoize
