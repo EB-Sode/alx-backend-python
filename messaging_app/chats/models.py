@@ -83,24 +83,26 @@ class CustomUser(AbstractUser, PermissionsMixin):
         return self.role == 'guest'
 
 
-class Messaging(models.Model):
+class Message(models.Model):
     message_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         db_index=True
     )
-    sender_id = models.ForeignKey(CustomUser, on_delete=models.CASCASE,
-                                  related_name='sender')
+    sender_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                                  related_name='messages')
     message_body = models.TextField(null=False)
     sent_at = models.DateTimeField(default=timezone.now)
 
 
 class Conversation(models.Model):
-    Conversation_id = models.UUIDField(
+    conversation_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         db_index=True
     )
-    participant_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
-                                       related_name='chats')
+    participants = models.ManyToManyField(
+        CustomUser,
+        on_delete=models.CASCASE,
+        related_name='conversation')
     created_at = models.DateTimeField(default=timezone.now)
