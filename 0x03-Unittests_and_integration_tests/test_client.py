@@ -3,12 +3,11 @@
 import unittest
 from unittest import mock
 from parameterized import parameterized
-from parameterized import parameterized_class
 from client import GithubOrgClient
-from fixtures import (org_payload, repos_payload,
-                      expected_repos, apache2_repos)
+# from fixtures import (org_payload, repos_payload,
+#                       expected_repos, apache2_repos)
 
-test_payload = org_payload
+# test_payload = org_payload
 
 
 class TestGithubOrgClient(unittest.TestCase):
