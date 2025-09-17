@@ -59,25 +59,40 @@ TEST_PAYLOAD = [
         "fork": False,
         "url": "https://api.github.com/repos/google/episodes.dart",
         "forks_url": "https://api.github.com/repos/google/episodes.dart/forks",
-        "keys_url": "https://api.github.com/repos/google/episodes.dart/keys{/key_id}",
-        "collaborators_url": "https://api.github.com/repos/google/episodes.dart/collaborators{/collaborator}",
+        "keys_url": "https://api.github.com/repos/google/episodes.dart/keys{"
+        "/key_id}",
+        "collaborators_url": "https://api.github.com/repos/google/episodes.dart"
+        "/collaborators{/collaborator}",
         "teams_url": "https://api.github.com/repos/google/episodes.dart/teams",
         "hooks_url": "https://api.github.com/repos/google/episodes.dart/hooks",
-        "issue_events_url": "https://api.github.com/repos/google/episodes.dart/issues/events{/number}",
+        "issue_events_url": "https://api.github.com/repos/google/episodes.dart"
+        "/issues/events{/number}",
         "events_url": "https://api.github.com/repos/google/episodes.dart/events",
-        "assignees_url": "https://api.github.com/repos/google/episodes.dart/assignees{/user}",
-        "branches_url": "https://api.github.com/repos/google/episodes.dart/branches{/branch}",
+        "assignees_url": "https://api.github.com/repos/google/episodes.dart/"
+        "assignees{/user}",
+        "branches_url": "https://api.github.com/repos/google/episodes.dart/"
+        "branches{/branch}",
         "tags_url": "https://api.github.com/repos/google/episodes.dart/tags",
-        "blobs_url": "https://api.github.com/repos/google/episodes.dart/git/blobs{/sha}",
-        "git_tags_url": "https://api.github.com/repos/google/episodes.dart/git/tags{/sha}",
-        "git_refs_url": "https://api.github.com/repos/google/episodes.dart/git/refs{/sha}",
-        "trees_url": "https://api.github.com/repos/google/episodes.dart/git/trees{/sha}",
-        "statuses_url": "https://api.github.com/repos/google/episodes.dart/statuses/{sha}",
-        "languages_url": "https://api.github.com/repos/google/episodes.dart/languages",
-        "stargazers_url": "https://api.github.com/repos/google/episodes.dart/stargazers",
-        "contributors_url": "https://api.github.com/repos/google/episodes.dart/contributors",
-        "subscribers_url": "https://api.github.com/repos/google/episodes.dart/subscribers",
-        "subscription_url": "https://api.github.com/repos/google/episodes.dart/subscription",
+        "blobs_url": "https://api.github.com/repos/google/episodes.dart/git"
+        "/blobs{/sha}",
+        "git_tags_url": "https://api.github.com/repos/google/episodes.dart/git"
+        "/tags{/sha}",
+        "git_refs_url": "https://api.github.com/repos/google/episodes.dart/git"
+        "/refs{/sha}",
+        "trees_url": "https://api.github.com/repos/google/episodes.dart/git/"
+        "trees{/sha}",
+        "statuses_url": "https://api.github.com/repos/google/episodes.dart/"
+        "statuses/{sha}",
+        "languages_url": "https://api.github.com/repos/google/episodes.dart/"
+        "languages",
+        "stargazers_url": "https://api.github.com/repos/google/episodes.dart/"
+        "stargazers",
+        "contributors_url": "https://api.github.com/repos/google/episodes.dart"
+        "/contributors",
+        "subscribers_url": "https://api.github.com/repos/google/episodes.dart"
+        "/subscribers",
+        "subscription_url": "https://api.github.com/repos/google/episodes.dart"
+        "/subscription",
         "commits_url": "https://api.github.com/repos/google/episodes.dart/commits{/sha}",
         "git_commits_url": "https://api.github.com/repos/google/episodes.dart/git/commits{/sha}",
         "comments_url": "https://api.github.com/repos/google/episodes.dart/comments{/number}",
