@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""
-Unit and integration tests for the GithubOrgClient class.
-"""
+"""Unit and integration tests for the GithubOrgClient class."""
 import unittest
-from unittest.mock import MagicMock, patch, PropertyMock
+import unittest
+from unittest.mock import patch
+from parameterized import parameterized
 from client import GithubOrgClient
-from parameterized import parameterized, parameterized_class
-from fixtures import (org_payload, repos_payload,
-                      expected_repos, apache2_repos)
+# from unittest.mock import MagicMock, patch, PropertyMock
+# from client import GithubOrgClient
+# from parameterized import parameterized, parameterized_class
+# from fixtures import (org_payload, repos_payload,
+#                       expected_repos, apache2_repos)
 
-test_payload = org_payload
+# test_payload = org_payload
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """Test class for GithubOrgClient"""
+    """Tests for GithubOrgClient"""
 
     @parameterized.expand([
         ("google",),
@@ -21,7 +23,7 @@ class TestGithubOrgClient(unittest.TestCase):
     ])
     @patch('client.get_json')
     def test_org(self, org_name, mock_get_json):
-        """Test that GithubOrgClient.org returns the correct value"""
+        """Test that .org returns the expected payload"""
         test_payload = {"payload": True}
         mock_get_json.return_value = test_payload
 
@@ -31,6 +33,10 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org_name}"
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
 
 #     def test_public_repos_url(self):
 #         """Test that _public_repos_url returns repos_url from org payload"""
@@ -149,6 +155,3 @@ class TestGithubOrgClient(unittest.TestCase):
 #             client.public_repos(license="apache-2.0"),
 #             self.apache2_repos
 #         )
-
-if __name__ == "__main__":
-    unittest.main()
