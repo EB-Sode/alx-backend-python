@@ -2,7 +2,7 @@
 """Unit and integration tests for the GithubOrgClient class."""
 import unittest
 from unittest import mock
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from client import GithubOrgClient
 # from fixtures import (org_payload, repos_payload,
 #                       expected_repos, apache2_repos)
