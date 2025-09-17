@@ -1,31 +1,19 @@
 #!/usr/bin/env python3
 
-org_payload = {
-    "login": "google",
-    "id": 1342004,
-    "node_id": "MDEyOk9yZ2FuaXphdGlvbjEzNDIwMDQ=",
-    "url": "https://api.github.com/orgs/google",
-    "repos_url": "https://api.github.com/orgs/google/repos",
-    "events_url": "https://api.github.com/orgs/google/events",
-    "hooks_url": "https://api.github.com/orgs/google/hooks",
-    "issues_url": "https://api.github.com/orgs/google/issues",
-    "members_url": "https://api.github.com/orgs/google/members{/member}",
-    "public_members_url": "https://api.github.com/orgs/google/public_members{/member}",
-    "avatar_url": "https://avatars.githubusercontent.com/u/1342004?v=4",
-    "description": "Google ❤️ Open Source",
-}
-
-repos_payload = [
-    {"id": 1, "name": "repo1", "license": {"key": "apache-2.0"}},
-    {"id": 2, "name": "repo2", "license": {"key": "mit"}},
-    {"id": 3, "name": "repo3", "license": {"key": "apache-2.0"}},
-]
-
-expected_repos = ["repo1", "repo2", "repo3"]
-
-apache2_repos = ["repo1", "repo3"]
 TEST_PAYLOAD = [
   (
+    {"org_payload": {
+        "login": "google",
+        "id": 1342004,
+        "repos_url": "https://api.github.com/orgs/google/repos",
+    }},
+    {"repos_payload": [
+        {"id": 1, "name": "repo1", "license": {"key": "apache-2.0"}},
+        {"id": 2, "name": "repo2", "license": {"key": "mit"}},
+        {"id": 3, "name": "repo3", "license": {"key": "apache-2.0"}},
+        ]},
+    {"expected_repos": ["repo1", "repo2", "repo3"]},
+    {"apache2_repos": ["repo1", "repo3"]},
     {"repos_url": "https://api.github.com/orgs/google/repos"},
     [
       {
@@ -91,8 +79,7 @@ TEST_PAYLOAD = [
         "/contributors",
         "subscribers_url": "https://api.github.com/repos/google/episodes.dart"
         "/subscribers",
-        "subscription_url": "https://api.github.com/repos/google/episodes.dart"
-        "/subscription",
+        "subscription_url": "https://api.github.com/repos/google/episodes.dart/subscription",
         "commits_url": "https://api.github.com/repos/google/episodes.dart/commits{/sha}",
         "git_commits_url": "https://api.github.com/repos/google/episodes.dart/git/commits{/sha}",
         "comments_url": "https://api.github.com/repos/google/episodes.dart/comments{/number}",
@@ -984,9 +971,8 @@ TEST_PAYLOAD = [
       }
     ],
     ['episodes.dart', 'cpp-netlib', 'dagger', 'ios-webkit-debug-proxy',
-     'google.github.io', 'kratu', 'build-debian-cloud', 'traceur-compiler',
-     'firmata.py'],
+    'google.github.io', 'kratu', 'build-debian-cloud', 'traceur-compiler',
+    'firmata.py'],
     ['dagger', 'kratu', 'traceur-compiler', 'firmata.py'],
   )
 ]
-
