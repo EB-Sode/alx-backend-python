@@ -1,11 +1,11 @@
 from django.db import models
 import uuid
 from .manager import UserManager
-from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 
 
-class User(AbstractUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     """Custom User model with UUID primary key and role-based system"""
 
     ROLE_CHOICES = [

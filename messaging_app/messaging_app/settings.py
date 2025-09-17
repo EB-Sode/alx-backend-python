@@ -27,6 +27,8 @@ SECRET_KEY = (
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+AUTH_USER_MODEL = "chats.User"  # force custom user as default
+
 ALLOWED_HOSTS = []
 
 
@@ -131,6 +133,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SECURE_SSL_REDIRECT = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
