@@ -13,13 +13,14 @@ test_payload = org_payload
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    '''
-    Test GithubOrgClient class to check client.py
-    using parameterized tests and patch to initialize mock get_json.
-    '''
+    """
+    Test the GithubOrgClient class from client.py using
+    parameterized tests and patching of get_json.
+    """
+
     @parameterized.expand([
         ("google",),
-        ("abc",)
+        ("abc",),
     ])
     @patch('client.get_json')
     def test_org(self, org_name, mock_get_json):
