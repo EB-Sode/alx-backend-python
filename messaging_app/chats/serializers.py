@@ -56,6 +56,15 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class ConversationMiniSerializer(serializers.ModelSerializer):
+    """Mini serializer for Conversation (inside Message)"""
+    participants = UserSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Conversation
+        fields = ['conversation_id', 'participants', 'created_at']
+
+
 class MessageSerializer(serializers.ModelSerializer):
     """
     Serializer for Message model with nested sender information
@@ -64,6 +73,7 @@ class MessageSerializer(serializers.ModelSerializer):
     # Nested serializer to include full sender details in response
     # Uses 'sender_id' field from model but displays as 'sender'
     sender = UserSerializer(source='sender_id', read_only=True)
+    conversation = serializers.SerializerMethodField()
 
     # Write-only field for creating messages (accepts user ID)
     sender = serializers.PrimaryKeyRelatedField(
@@ -81,6 +91,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'sender_id',        # Sender ID for creation (write-only)
             'message_body',     # Message content
             'sent_at',          # Timestamp when message was sent
+            'conversation'
         ]
         # Fields that are automatically set by system
         read_only_fields = ['message_id', 'sent_at']
