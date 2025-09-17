@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Unit and integration tests for the GithubOrgClient class."""
+"""Unit and integration tests for the GithubOrgClient."""
 import unittest
 from unittest import mock
 from parameterized import parameterized, parameterized_class
@@ -144,3 +144,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
             client.public_repos(license="apache-2.0"),
             self.apache2_repos
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
