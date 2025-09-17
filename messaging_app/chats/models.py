@@ -4,29 +4,8 @@ from .manager import UserManager
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.utils import timezone
 
-# Create your models here.
-#     user_id (Primary Key, UUID, Indexed)
-#     first_name (VARCHAR, NOT NULL)
-#     last_name (VARCHAR, NOT NULL)
-#     email (VARCHAR, UNIQUE, NOT NULL)
-#     password_hash (VARCHAR, NOT NULL)
-#     phone_number (VARCHAR, NULL)
-#     role (ENUM: 'guest', 'host', 'admin', NOT NULL)
-#     created_at (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
-# Message
 
-#     message_id (Primary Key, UUID, Indexed)
-#     sender_id (Foreign Key, references User(user_id))
-#     message_body (TEXT, NOT NULL)
-#     sent_at (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
-# Conversation
-
-# conversation_id (Primary Key, UUID, Indexed)
-# participants_id (Foreign Key, references User(user_id)
-# created_at (TIMESTAMP, DEFAULT CURRENT_TIMESTAMP)
-
-
-class CustomUser(AbstractUser, PermissionsMixin):
+class User(AbstractUser, PermissionsMixin):
     """Custom User model with UUID primary key and role-based system"""
 
     ROLE_CHOICES = [
@@ -41,10 +20,10 @@ class CustomUser(AbstractUser, PermissionsMixin):
         editable=False,
         db_index=True
     )
-    first_name = models.CharField(max_length=200, null=False)
-    last_name = models.CharField(max_length=200, null=False)
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
     email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=20, null=True)
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
     role = models.CharField(max_length=10,
                             choices=ROLE_CHOICES,
                             default='guest')
@@ -53,7 +32,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    objects = UserManager
+    objects = UserManager()
 
     USERNAME_FIELD = 'email'  # Use email as the unique identifier
     REQUIRED_FIELDS = ['first_name', 'last_name']  # when creating superuser
@@ -83,26 +62,65 @@ class CustomUser(AbstractUser, PermissionsMixin):
         return self.role == 'guest'
 
 
-class Message(models.Model):
-    message_id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        db_index=True
-    )
-    sender_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
-                                  related_name='messages')
-    message_body = models.TextField(null=False)
-    sent_at = models.DateTimeField(default=timezone.now)
-
-
 class Conversation(models.Model):
+    """Models for conversations"""
     conversation_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
         db_index=True
     )
     participants = models.ManyToManyField(
-        CustomUser,
-        on_delete=models.CASCASE,
-        related_name='conversation')
+        User,
+        related_name='conversations')
     created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'conversations'
+        indexes = [
+            models.Index(fields=['conversation_id']),
+            models.Index(fields=['created_at']),
+        ]
+
+    def __str__(self):
+        participant_names = [p.full_name for p in self.participants.all()[:2]]
+        return f"Conversation: {', '.join(participant_names)}"
+
+
+class Message(models.Model):
+    message_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        db_index=True
+    )
+    conversation = models.ForeignKey(  # Fixed: Link to conversation
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='sent_messages'
+    )
+    message_body = models.TextField(null=False)
+    sent_at = models.DateTimeField(default=timezone.now)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'messages'
+        indexes = [
+            models.Index(fields=['message_id']),
+            models.Index(fields=['conversation', 'sent_at']),
+            models.Index(fields=['sender']),
+        ]
+        ordering = ['-sent_at']
+
+    def __str__(self):
+        return f"Message from {self.sender.full_name}: {
+            self.message_body[:50]}"
+
+    def mark_as_read(self):
+        """Mark message as read"""
+        self.is_read = True
+        self.save(update_fields=['is_read'])
