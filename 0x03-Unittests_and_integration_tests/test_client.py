@@ -35,8 +35,8 @@ class TestGithubOrgClient(unittest.TestCase):
         )
 
 
-# if __name__ == "__main__":
-#     unittest.main()
+if __name__ == "__main__":
+    unittest.main()
 
 #     def test_public_repos_url(self):
 #         """Test that _public_repos_url returns repos_url from org payload"""
