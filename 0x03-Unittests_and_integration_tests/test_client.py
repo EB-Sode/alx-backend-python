@@ -13,10 +13,7 @@ test_payload = org_payload
 
 
 class TestGithubOrgClient(unittest.TestCase):
-    """
-    Test the GithubOrgClient class from client.py using
-    parameterized tests and patching of get_json.
-    """
+    """Test class for GithubOrgClient"""
 
     @parameterized.expand([
         ("google",),
@@ -24,11 +21,13 @@ class TestGithubOrgClient(unittest.TestCase):
     ])
     @patch('client.get_json')
     def test_org(self, org_name, mock_get_json):
-        """Test that the org property returns the correct payload."""
+        """Test that GithubOrgClient.org returns the correct value"""
         test_payload = {"payload": True}
         mock_get_json.return_value = test_payload
+
         client = GithubOrgClient(org_name)
         self.assertEqual(client.org, test_payload)
+
         mock_get_json.assert_called_once_with(
             f"https://api.github.com/orgs/{org_name}"
         )
@@ -150,3 +149,6 @@ class TestGithubOrgClient(unittest.TestCase):
 #             client.public_repos(license="apache-2.0"),
 #             self.apache2_repos
 #         )
+
+if __name__ == "__main__":
+    unittest.main()
