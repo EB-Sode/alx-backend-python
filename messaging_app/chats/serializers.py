@@ -56,18 +56,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class ConversationSerializer(serializers.ModelSerializer):
-    participants = UserSerializer(many=True, read_only=True)
-    created_by = serializers.CharField(source="created_by.first_name",
-                                       read_only=True)
-
-    class Meta:
-        model = Conversation
-        fields = [
-            'conversation_id', 'participants', 'created_at'
-        ]
-
-
 class MessageSerializer(serializers.ModelSerializer):
     """
     Serializer for Message model with nested sender information
@@ -116,3 +104,23 @@ class MessageSerializer(serializers.ModelSerializer):
             except Conversation.DoesNotExist:
                 raise serializers.ValidationError("Invalid conversation")
         return value
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    participants = UserSerializer(many=True, read_only=True)
+    created_by = serializers.CharField(source="created_by.first_name",
+                                       read_only=True)
+    messages = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Conversation
+        fields = [
+            'conversation_id', 'participants', 'created_at', 'messages'
+        ]
+
+    def get_messages(self, obj):
+        """
+        Returns all messages belonging to this conversation
+        """
+        messages = Message.objects.filter(conversation=obj).order_by("sent_at")
+        return MessageSerializer(messages, many=True).data
