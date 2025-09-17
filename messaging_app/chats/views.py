@@ -1,6 +1,7 @@
 from rest_framework import (
     viewsets, permissions,
     filters, status)
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Prefetch
@@ -31,7 +32,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["post"],
             permission_classes=[permissions.AllowAny])
     def register(self, request, *args, **kwargs):
-        #
+        """Registers new users"""
         serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -68,13 +69,23 @@ class ConversationViewSet(viewsets.ModelViewSet):
         conversation.participants.add(self.request.user)
         return conversation
 
+    def destroy(self, request, *args, **kwargs):
+        """
+        Override to return a clear response with status
+        """
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"detail": "Conversation deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
 
 # Message Views
 class MessageViewSet(viewsets.ModelViewSet):
     """
     Handles sending and retrieving messages
     """
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -82,10 +93,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     ordering_fields = ["sent_at"]
 
     def get_queryset(self):
-        return Message.objects.filter(
-            conversation__participants=self.request.user
-        ).select_related("sender", "conversation")
+        conversation_id = self.kwargs.get("conversation_pk")
+        return Message.objects.filter(conversation_id=conversation_id)
 
     def perform_create(self, serializer):
-        # Ensure sender is the logged-in user
-        serializer.save(sender=self.request.user)
+        conversation_id = self.kwargs.get("conversation_pk")
+        conversation = get_object_or_404(Conversation, pk=conversation_id)
+        serializer.save(conversation=conversation)
