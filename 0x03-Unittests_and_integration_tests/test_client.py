@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """Unit and integration tests for the GithubOrgClient class."""
 import unittest
-import unittest
 from unittest.mock import patch
 from parameterized import parameterized
 from client import GithubOrgClient
-from unittest.mock import MagicMock, patch, PropertyMock
-from client import GithubOrgClient
-from parameterized import parameterized, parameterized_class
-from fixtures import (org_payload, repos_payload,
-                      expected_repos, apache2_repos)
+# from unittest.mock import MagicMock, patch, PropertyMock
+# from client import GithubOrgClient
+# from parameterized import parameterized, parameterized_class
+# from fixtures import (org_payload, repos_payload,
+#                       expected_repos, apache2_repos)
 
-test_payload = org_payload
+# test_payload = org_payload
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -34,9 +33,6 @@ class TestGithubOrgClient(unittest.TestCase):
             f"https://api.github.com/orgs/{org_name}"
         )
 
-
-if __name__ == "__main__":
-    unittest.main()
 
 #     def test_public_repos_url(self):
 #         """Test that _public_repos_url returns repos_url from org payload"""
