@@ -97,26 +97,26 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     """Integration test for GithubOrgClient.public_repos method"""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(self):
         """Set up patcher for requests.get before all tests"""
-        cls.get_patcher = mock.patch("requests.get")
-        mock_get = cls.get_patcher.start()
+        self.get_patcher = mock.patch("requests.get")
+        mock_get = self.get_patcher.start()
 
         def side_effect(url):
             """Return payload depending on URL"""
             mock_response = mock.MagicMock()
             if url.endswith("/repos"):
-                mock_response.json.return_value = cls.repos_payload
+                mock_response.json.return_value = self.repos_payload
             else:  # assume it's the org URL
-                mock_response.json.return_value = cls.org_payload
+                mock_response.json.return_value = self.org_payload
             return mock_response
 
         mock_get.side_effect = side_effect
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(self):
         """Stop patcher after all tests"""
-        cls.get_patcher.stop()
+        self.get_patcher.stop()
 
     def test_public_repos(self):
         """Test that public_repos returns expected repo list"""
