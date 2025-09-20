@@ -4,6 +4,7 @@ import unittest
 from unittest import mock
 from parameterized import parameterized
 from client import GithubOrgClient
+from unittest.mock import patch
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -45,7 +46,7 @@ class TestGithubOrgClient(unittest.TestCase):
             mock_org.assert_called_once()
 
 
-@mock.patch("client.get_json")
+@patch("client.get_json")
 def test_public_repos(self, mock_get_json):
     """Test that public_repos returns expected repo names"""
     test_repos = [
