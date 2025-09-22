@@ -1,6 +1,5 @@
-from rest_framework import (
-    viewsets, permissions,
-    filters, status)
+from rest_framework import (viewsets, filters, status)
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import (BasicAuthentication,
                                            SessionAuthentication)
 from django.shortcuts import get_object_or_404
@@ -14,6 +13,7 @@ from .serializers import (
     ConversationSerializer,
     MessageSerializer,
 )
+from .permissions import IsConversationParticipant
 
 
 # User Views
@@ -23,8 +23,8 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    authentication_classes = BasicAuthentication, SessionAuthentication
-    permission_classes = [permissions.AllowAny]
+    authentication_classes = [BasicAuthentication, SessionAuthentication]
+    permission_classes = [AllowAny]
 
     def get_serializer_class(self):
         # Use registration serializer only for 'register' action
@@ -33,7 +33,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     @action(detail=False, methods=["post"],
-            permission_classes=[permissions.AllowAny])
+            permission_classes=[AllowAny])
     def register(self, request, *args, **kwargs):
         """Registers new users"""
         serializer = UserRegisterSerializer(data=request.data)
@@ -51,8 +51,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
-    authentication_classes = BasicAuthentication, SessionAuthentication
-    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [BasicAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated, IsConversationParticipant]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["participants__first_name", "participants__last_name"]
     ordering_fields = ["created_at"]
@@ -92,7 +92,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     serializer_class = MessageSerializer
     authentication_classes = BasicAuthentication, SessionAuthentication
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsConversationParticipant]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["message_body", "sender__first_name", "sender__last_name"]
     ordering_fields = ["sent_at"]
