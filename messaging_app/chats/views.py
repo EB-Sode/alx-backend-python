@@ -13,7 +13,7 @@ from .serializers import (
     ConversationSerializer,
     MessageSerializer,
 )
-from .permissions import IsConversationParticipant
+from .permissions import IsParticipantOfConversation
 
 
 # User Views
@@ -52,7 +52,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     authentication_classes = [BasicAuthentication, SessionAuthentication]
-    permission_classes = [IsAuthenticated, IsConversationParticipant]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["participants__first_name", "participants__last_name"]
     ordering_fields = ["created_at"]
@@ -92,7 +92,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     """
     serializer_class = MessageSerializer
     authentication_classes = BasicAuthentication, SessionAuthentication
-    permission_classes = [IsAuthenticated, IsConversationParticipant]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["message_body", "sender__first_name", "sender__last_name"]
     ordering_fields = ["sent_at"]
