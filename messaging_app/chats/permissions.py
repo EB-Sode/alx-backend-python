@@ -1,9 +1,37 @@
-# chats/permissions.py
-from rest_framework import permissions
+from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
-class IsParticipantOfConversation(permissions.BasePermission):
-    """Only participants can view a conversation and its messages"""
+class IsParticipantOfConversation(BasePermission):
+    """
+    Allow only participants of a conversation to send, view,
+    update, and delete messages.
+    """
+
+    def has_permission(self, request, view):
+        # Must be authenticated for any action
+        return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.participants.all()
+        """
+        Object-level check:
+        - For Message objects → verify user in conversation participants
+        - For Conversation objects → verify user in participants
+        """
+        if hasattr(obj, "conversation"):  # Message object
+            is_participant = obj.conversation.participants.filter(
+                id=request.user.id
+            ).exists()
+
+        elif hasattr(obj, "participants"):  # Conversation object
+            is_participant = obj.participants.filter(
+                id=request.user.id).exists()
+
+        else:
+            return False
+
+        # Explicitly allow participants full CRUD
+        if request.method in SAFE_METHODS:
+            return is_participant
+        elif request.method in ["POST", "PUT", "PATCH", "DELETE"]:
+            return is_participant
+        return False

@@ -2,7 +2,6 @@ from rest_framework import (viewsets, filters, status)
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import (BasicAuthentication,
                                            SessionAuthentication)
-from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.db.models import Prefetch
@@ -58,20 +57,42 @@ class ConversationViewSet(viewsets.ModelViewSet):
     ordering_fields = ["created_at"]
 
     def get_queryset(self):
+        """
+        Restrict conversations to only those the current user participates in,
+        and optimize DB queries by prefetching participants and messages.
+        """
         return (
             Conversation.objects.filter(participants=self.request.user)
             .prefetch_related(
                 "participants",
-                Prefetch("message_set",
-                         queryset=Message.objects.select_related("sender"))
+                Prefetch(
+                    "message_set",
+                    queryset=Message.objects.select_related("sender")
+                )
             )
         )
 
     def perform_create(self, serializer):
-        # Add the request user as a participant automatically
+        """
+        When creating a conversation:
+        - Save the conversation
+        - Automatically add the requesting user as a participant
+        """
         conversation = serializer.save()
         conversation.participants.add(self.request.user)
         return conversation
+
+    def perform_update(self, serializer):
+        """
+        Prevent users who are not participants from updating a conversation.
+        """
+        if not serializer.instance.participants.filter(
+                id=self.request.user.id).exists():
+            return Response(
+                {"detail": "You cannot update this conversation."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer.save()
 
     def destroy(self, request, *args, **kwargs):
         """
@@ -98,10 +119,31 @@ class MessageViewSet(viewsets.ModelViewSet):
     ordering_fields = ["sent_at"]
 
     def get_queryset(self):
+        """
+        Restrict messages to:
+        - The conversation specified in the URL (conversation_pk)
+        - AND only if the current user is a participant of that conversation
+        """
         conversation_id = self.kwargs.get("conversation_pk")
-        return Message.objects.filter(conversation_id=conversation_id)
+        user = self.request.user
+        return Message.objects.filter(
+            conversation_id=conversation_id,
+            conversation__participants=user
+        )
 
     def perform_create(self, serializer):
-        conversation_id = self.kwargs.get("conversation_pk")
-        conversation = get_object_or_404(Conversation, pk=conversation_id)
-        serializer.save(conversation=conversation)
+        """
+        When creating a message:
+        - Ensure the user is a participant of the conversation
+        - If not, return 403 Forbidden
+        """
+        conversation = serializer.validated_data.get("conversation")
+        if not conversation.participants.filter(
+                id=self.request.user.id).exists():
+            return Response(
+                {
+                 "detail": "Not allowed to send messages in this conversation."
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer.save(sender=self.request.user)
