@@ -1,9 +1,13 @@
 # chats/auth.py
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import serializers
+from django.contrib.auth import authenticate
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = "email"  # tell SimpleJWT to use email instead of username
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -13,12 +17,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
-        # Use email instead of username
-        credentials = {
-            'email': attrs.get('username'),  # frontend still posts `username`
-            'password': attrs.get('password'),
-        }
-        return super().validate(credentials)
+        # override to explicitly authenticate with email
+        email = attrs.get("email") or attrs.get("username")  # send either
+        password = attrs.get("password")
+
+        user = authenticate(email=email, password=password)
+        if not user:
+            raise serializers.ValidationError(
+                "No active account found with the given credentials")
+
+        data = super().validate(attrs)
+        return data
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

@@ -4,6 +4,7 @@ from rest_framework.authentication import (BasicAuthentication,
                                            SessionAuthentication)
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound, PermissionDenied
 from django.db.models import Prefetch
 from .models import User, Conversation, Message
 from .serializers import (
@@ -136,16 +137,20 @@ class MessageViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """
         When creating a message:
-        - Ensure the user is a participant of the conversation
-        - If not, return 403 Forbidden
+        - Fetch the conversation from URL
+        - Ensure the user is a participant
+        - Save the message with sender + conversation
         """
-        conversation = serializer.validated_data.get("conversation")
+        conversation_id = self.kwargs.get("conversation_pk")
+        conversation = Conversation.objects.filter(
+            conversation_id=conversation_id).first()
+
+        if not conversation:
+            raise NotFound("Conversation not found.")
+
         if not conversation.participants.filter(
                 id=self.request.user.id).exists():
-            return Response(
-                {
-                 "detail": "Not allowed to send messages in this conversation."
-                },
-                status=status.HTTP_403_FORBIDDEN
-            )
-        serializer.save(sender=self.request.user)
+            raise PermissionDenied(
+                "Not allowed to send messages in this conversation.")
+
+        serializer.save(sender=self.request.user, conversation=conversation)

@@ -2,10 +2,7 @@ from django.urls import path, include
 from rest_framework_nested import routers
 from .auth import CustomTokenObtainPairView
 from .views import UserViewSet, ConversationViewSet, MessageViewSet
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
 
 # Main router
 router = routers.DefaultRouter()

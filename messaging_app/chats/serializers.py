@@ -91,7 +91,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'sender_id',        # Sender ID for creation (write-only)
             'message_body',     # Message content
             'sent_at',          # Timestamp when message was sent
-            'conversation'
+            'conversation',
+            'sender_details'
         ]
         # Fields that are automatically set by system
         read_only_fields = ['message_id', 'sent_at']
@@ -126,7 +127,8 @@ class ConversationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Conversation
         fields = [
-            'conversation_id', 'participants', 'created_at', 'messages'
+            'conversation_id', 'participants', 'created_at',
+            'messages', 'created_by',
         ]
 
     def get_messages(self, obj):
