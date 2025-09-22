@@ -1,6 +1,8 @@
 from rest_framework import (
     viewsets, permissions,
     filters, status)
+from rest_framework.authentication import (BasicAuthentication,
+                                           SessionAuthentication)
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -21,6 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = BasicAuthentication, SessionAuthentication
     permission_classes = [permissions.AllowAny]
 
     def get_serializer_class(self):
@@ -48,6 +51,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     """
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
+    authentication_classes = BasicAuthentication, SessionAuthentication
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["participants__first_name", "participants__last_name"]
@@ -87,6 +91,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     Handles sending and retrieving messages
     """
     serializer_class = MessageSerializer
+    authentication_classes = BasicAuthentication, SessionAuthentication
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["message_body", "sender__first_name", "sender__last_name"]
