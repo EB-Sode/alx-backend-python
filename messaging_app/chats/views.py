@@ -13,6 +13,7 @@ from .serializers import (
     MessageSerializer,
 )
 from .permissions import IsParticipantOfConversation
+from .pagination import MessagePagination
 
 
 # User Views
@@ -117,6 +118,7 @@ class MessageViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["message_body", "sender__first_name", "sender__last_name"]
     ordering_fields = ["sent_at"]
+    pagination_class = MessagePagination
 
     def get_queryset(self):
         """
