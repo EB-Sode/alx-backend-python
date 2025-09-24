@@ -100,3 +100,40 @@ class OffensiveLanguageMiddleware:
         if x_forwarded_for:
             return x_forwarded_for.split(",")[0]
         return request.META.get("REMOTE_ADDR")
+
+
+class RolePermissionMiddleware:
+    """
+    Middleware that restricts access based on user role.
+    Only users with role 'admin' or 'moderator' are allowed.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = None
+
+        # Try DRF authentication classes to resolve the user
+        for authenticator in api_settings.DEFAULT_AUTHENTICATION_CLASSES:
+            auth = authenticator()
+            try:
+                auth_result = auth.authenticate(request)
+                if auth_result is not None:
+                    user, _ = auth_result
+                    break
+            except Exception:
+                pass
+
+        # If user is not authenticated or has wrong role → block
+        if not user or getattr(user, "role", None) not in ["admin", "moderator"]:
+            logger.warning(
+                f"RolePermissionMiddleware: Blocked access for {user} "
+                f"with role={getattr(user, 'role', None)} on {request.path}"
+            )
+            return HttpResponseForbidden(
+                "🚫 Access denied: Only admins and moderators are allowed."
+            )
+
+        # Continue with request
+        return self.get_response(request)
