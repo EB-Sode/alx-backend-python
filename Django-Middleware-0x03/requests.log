@@ -1,0 +1,13 @@
+Watching for file changes with StatReloader
+2025-09-24 04:45:25.007435 - User: Anonymous - Path: /api/users/
+Unauthorized: /api/users/
+2025-09-24 04:45:57.631305 - User: Anonymous - Path: /api/conversations/
+2025-09-24 04:46:39.963788 - User: Anonymous - Path: /api/users/
+Bad Request: /api/users/
+2025-09-24 04:47:21.107835 - User: Anonymous - Path: /api/users/login/
+Method Not Allowed: /api/users/login/
+2025-09-24 04:47:28.241953 - User: Anonymous - Path: /api/users/login/
+Not Found: /api/users/login/
+2025-09-24 04:47:47.773993 - User: Anonymous - Path: /api/users/
+/Users/richmondsode/Projects/Back_End/alx-backend-python/Django-Middleware-0x03/chats/middleware.py changed, reloading.
+Watching for file changes with StatReloader
