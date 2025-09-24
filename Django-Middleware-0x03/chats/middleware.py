@@ -102,7 +102,7 @@ class OffensiveLanguageMiddleware:
         return request.META.get("REMOTE_ADDR")
 
 
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     """
     Middleware that restricts access based on user role.
     Only users with role 'admin' or 'moderator' are allowed.
