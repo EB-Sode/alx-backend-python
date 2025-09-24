@@ -2,6 +2,7 @@ from datetime import datetime
 import logging
 from rest_framework.settings import api_settings
 from django.http import HttpResponseForbidden
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -50,3 +51,52 @@ class RestrictAccessByTimeMiddleware:
         # Otherwise continue
         response = self.get_response(request)
         return response
+
+
+class OffensiveLanguageMiddleware:
+    """
+    Middleware that limits number of chat messages per IP.
+    Allows max 5 messages per minute per IP.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Store request counts per IP: {ip: [timestamps]}
+        self.request_logs = {}
+
+    def __call__(self, request):
+        ip = self.get_client_ip(request)
+        now = datetime.now()
+
+        # Track only POST requests (messages)
+        if request.method == "POST" and "/messages/" in request.path:
+            # Initialize log for this IP
+            if ip not in self.request_logs:
+                self.request_logs[ip] = []
+
+            # Remove timestamps older than 1 minute
+            self.request_logs[ip] = [
+                ts for ts in self.request_logs[ip]
+                if now - ts < timedelta(minutes=1)
+            ]
+
+            # Check if user exceeded limit
+            if len(self.request_logs[ip]) >= 5:
+                logger.warning(
+                    f"{now} - BLOCKED: IP {ip} exceeded 5 messages/min on {request.path}"
+                )
+                return HttpResponseForbidden(
+                    "❌ Rate limit exceeded: Max 5 messages per minute."
+                )
+
+            # Log this request
+            self.request_logs[ip].append(now)
+
+        return self.get_response(request)
+
+    def get_client_ip(self, request):
+        """Extract client IP address"""
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        if x_forwarded_for:
+            return x_forwarded_for.split(",")[0]
+        return request.META.get("REMOTE_ADDR")
