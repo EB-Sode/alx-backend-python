@@ -83,7 +83,8 @@ class OffensiveLanguageMiddleware:
             # Check if user exceeded limit
             if len(self.request_logs[ip]) >= 5:
                 logger.warning(
-                    f"{now} - BLOCKED: IP {ip} exceeded 5 messages/min on {request.path}"
+                    f"{now} - BLOCKED: IP {
+                        ip} exceeded 5 messages/min on {request.path}"
                 )
                 return HttpResponseForbidden(
                     "❌ Rate limit exceeded: Max 5 messages per minute."
@@ -126,7 +127,9 @@ class RolepermissionMiddleware:
                 pass
 
         # If user is not authenticated or has wrong role → block
-        if not user or getattr(user, "role", None) not in ["admin", "moderator"]:
+        if not user or getattr(user, "role", None) not in [
+                    "admin", "moderator"
+                ]:
             logger.warning(
                 f"RolePermissionMiddleware: Blocked access for {user} "
                 f"with role={getattr(user, 'role', None)} on {request.path}"
