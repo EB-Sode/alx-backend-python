@@ -1,7 +1,8 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS
+from rest_framework import permissions
 
 
-class IsParticipantOfConversation(BasePermission):
+class IsParticipantOfConversation(permissions.BasePermission):
     """
     Allow only participants of a conversation to send, view,
     update, and delete messages.
