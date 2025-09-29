@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from django.shortcuts import Http404
 from .models import Message
+from django.views.decorators.cache import cache_page
 
 
 @login_required
@@ -59,4 +61,32 @@ def unread_messages(request):
         }
         for msg in unread_msgs
     ]
+    return JsonResponse(data, safe=False)
+
+
+# Function-based view with caching
+@cache_page(60)  # cache this view for 60 seconds
+def conversation_messages(request, conversation_id):
+    messages = (
+        Message.objects.filter(
+            parent_message__isnull=True, receiver_id=conversation_id)
+        .select_related("sender", "receiver")
+        .only("id", "sender__username", "receiver__username",
+              "content", "timestamp", "edited", "read")
+    )
+
+    data = [
+        {
+            "id": msg.id,
+            "sender": str(msg.sender),
+            "receiver": str(msg.receiver),
+            "content": msg.content,
+            "timestamp": msg.timestamp,
+            "edited": msg.edited,
+            "read": msg.read,
+            "replies": msg.get_threaded_replies(),
+        }
+        for msg in messages
+    ]
+
     return JsonResponse(data, safe=False)
