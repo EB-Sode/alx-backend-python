@@ -1,10 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import Http404
 from .models import Message
-
-User = get_user_model()
 
 
 @login_required
@@ -42,4 +39,24 @@ def get_message_thread(request, message_id):
         "replies": message.get_threaded_replies()  # recursion in model
     }
 
+    return JsonResponse(data, safe=False)
+
+
+def unread_messages(request):
+    """Return only unread messages for logged-in user"""
+    user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=403)
+
+    unread_msgs = Message.unread.for_user(user)
+
+    data = [
+        {
+            "id": msg.id,
+            "sender": str(msg.sender),
+            "content": msg.content,
+            "timestamp": msg.timestamp,
+        }
+        for msg in unread_msgs
+    ]
     return JsonResponse(data, safe=False)

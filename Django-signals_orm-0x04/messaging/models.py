@@ -6,6 +6,17 @@ from django.conf import settings
 User = settings.AUTH_USER_MODEL
 
 
+class UnreadMessagesManager(models.Manager):
+    """Manager to fetch unread messages for a specific user."""
+    def for_user(self, user):
+        return (
+            self.get_queryset()
+            .filter(receiver=user, read=False)
+            .select_related("sender")  # avoid extra queries
+            .only("id", "sender", "content", "timestamp")  # optimize
+        )
+
+
 class Message(models.Model):
     sender = models.ForeignKey(User,
                                on_delete=models.CASCADE,
@@ -21,6 +32,11 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
+    read = models.BooleanField(default=False)  # NEW FIELD
+
+    # Managers
+    objects = models.Manager()  # default manager
+    unread = UnreadMessagesManager()  # custom manager
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver}: {self.content[:30]}"
