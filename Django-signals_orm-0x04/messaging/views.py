@@ -50,7 +50,9 @@ def unread_messages(request):
     if not user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=403)
 
-    unread_msgs = Message.unread.for_user(user)
+    unread_messages = Message.unread.unread_for_user(request.user).only(
+        "id", "sender__username", "receiver__username", "content", "timestamp"
+    )
 
     data = [
         {
@@ -59,7 +61,7 @@ def unread_messages(request):
             "content": msg.content,
             "timestamp": msg.timestamp,
         }
-        for msg in unread_msgs
+        for msg in unread_messages
     ]
     return JsonResponse(data, safe=False)
 
