@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import Http404
 from .models import Message
 
 User = get_user_model()
@@ -24,12 +24,13 @@ def get_message_thread(request, message_id):
     View that returns a message with all its threaded replies.
     Ensures that the message belongs to the current user (as sender).
     """
-    message = get_object_or_404(
-        Message.objects.select_related(
-            "sender", "receiver").prefetch_related("replies"),
+    message = Message.objects.filter(
         id=message_id,
-        sender=request.user
-    )
+        sender=request.user  # security check
+    ).select_related("sender", "receiver").prefetch_related("replies").first()
+
+    if not message:
+        raise Http404("Message not found or you don't have access.")
 
     data = {
         "id": message.id,
@@ -38,7 +39,7 @@ def get_message_thread(request, message_id):
         "content": message.content,
         "timestamp": message.timestamp,
         "edited": message.edited,
-        "replies": message.get_threaded_replies()
+        "replies": message.get_threaded_replies()  # recursion in model
     }
 
     return JsonResponse(data, safe=False)
