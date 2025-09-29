@@ -22,11 +22,13 @@ def delete_user(request):
 def get_message_thread(request, message_id):
     """
     View that returns a message with all its threaded replies.
+    Ensures that the message belongs to the current user (as sender).
     """
     message = get_object_or_404(
         Message.objects.select_related(
             "sender", "receiver").prefetch_related("replies"),
-        id=message_id
+        id=message_id,
+        sender=request.user
     )
 
     data = {
