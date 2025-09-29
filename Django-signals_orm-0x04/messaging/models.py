@@ -13,12 +13,36 @@ class Message(models.Model):
     receiver = models.ForeignKey(User,
                                  on_delete=models.CASCADE,
                                  related_name="received_messages")
+    parent_message = models.ForeignKey("self",
+                                       null=True,
+                                       blank=True,
+                                       related_name="replies",
+                                       on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)
 
     def __str__(self):
         return f"From {self.sender} to {self.receiver}: {self.content[:30]}"
+
+    def get_threaded_replies(self):
+        """
+        Recursive method to fetch all replies in a threaded format.
+        """
+        replies = self.replies.select_related("sender", "receiver"
+                                              ).prefetch_related("replies")
+        result = []
+        for reply in replies:
+            result.append({
+                "id": reply.id,
+                "sender": str(reply.sender),
+                "receiver": str(reply.receiver),
+                "content": reply.content,
+                "timestamp": reply.timestamp,
+                "edited": reply.edited,
+                "replies": reply.get_threaded_replies()  # recursion
+            })
+        return result
 
 
 class Notification(models.Model):
