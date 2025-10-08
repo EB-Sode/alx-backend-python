@@ -29,7 +29,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                             default='guest')
     created_at = models.DateTimeField(default=timezone.now)
 
-    password = models.CharField()
+    password = models.CharField(max_length=128)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
