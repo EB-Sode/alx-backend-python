@@ -119,9 +119,8 @@ class Message(models.Model):
         ordering = ['-sent_at']
 
     def __str__(self):
-        return f"Message from {self.sender.full_name}: {
-            self.message_body[:50]}"
-
+        return f"Message from {self.sender.full_name}: {self.message_body[:50]}"
+            
     def mark_as_read(self):
         """Mark message as read"""
         self.is_read = True
