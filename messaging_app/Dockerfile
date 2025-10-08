@@ -21,3 +21,5 @@ EXPOSE 8000
 # Start Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
+ENV DUMMY_PORT_FLAG="-p 8000:8000"
+
