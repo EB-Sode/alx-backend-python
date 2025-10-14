@@ -1,0 +1,78 @@
+#!/bin/bash
+# kubctl-0x01.sh
+# Purpose: Scale Django app replicas, verify pods, load test, and monitor resource usage.
+
+# Exit immediately on error
+set -e
+
+# Define variables
+DEPLOYMENT_NAME="messaging-app-deployment"
+SERVICE_NAME="messaging-app-service"
+NAMESPACE="default"
+REPLICAS=3
+PORT=8000
+
+echo "============================"
+echo "🔹 Scaling Django Deployment"
+echo "============================"
+kubectl scale deployment "$DEPLOYMENT_NAME" --replicas=$REPLICAS -n "$NAMESPACE"
+
+echo ""
+echo "⏳ Waiting for pods to start..."
+sleep 10
+
+echo ""
+echo "============================"
+echo "🔹 Verifying Running Pods"
+echo "============================"
+kubectl get pods -n "$NAMESPACE" -o wide
+
+echo ""
+echo "============================"
+echo "🔹 Exposing Service for Load Testing"
+echo "============================"
+# Expose temporarily for wrk to access it
+minikube service "$SERVICE_NAME" --url
+APP_URL=$(minikube service "$SERVICE_NAME" --url)
+
+echo ""
+echo "Service available at: $APP_URL"
+
+echo ""
+echo "============================"
+echo "🔹 Load Testing with wrk"
+echo "============================"
+# Run a 30-second load test using 4 threads and 100 connections
+if command -v wrk &> /dev/null
+then
+    echo "Running wrk load test for 30 seconds..."
+    wrk -t4 -c100 -d30s "$APP_URL"
+else
+    echo "⚠️ wrk not installed. Please install it using:"
+    echo "   brew install wrk   # macOS"
+    echo "   sudo apt install wrk  # Ubuntu/Debian"
+fi
+
+echo ""
+echo "============================"
+echo "🔹 Monitoring Resource Usage"
+echo "============================"
+# Ensure metrics-server is running
+if ! kubectl top nodes &> /dev/null; then
+    echo "⚠️ Metrics Server not found. Installing..."
+    minikube addons enable metrics-server
+    echo "Waiting for metrics-server to start..."
+    sleep 20
+fi
+
+echo ""
+echo "Node Usage:"
+kubectl top nodes
+
+echo ""
+echo "Pod Usage:"
+kubectl top pods -n "$NAMESPACE"
+
+echo ""
+echo "✅ Scaling and load test complete!"
+
