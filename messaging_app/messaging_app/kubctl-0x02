@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# kubctl-0x02
+# Blue-Green Deployment Automation for Messaging App
+
+set -e  # Exit on any error
+
+echo "🟦 Deploying BLUE version..."
+kubectl apply -f blue_deployment.yaml
+
+echo "🟩 Deploying GREEN version..."
+kubectl apply -f green_deployment.yaml
+
+echo "🧱 Ensuring service exists..."
+kubectl apply -f kubeservice.yaml
+
+echo "🔍 Checking pod status..."
+kubectl get pods -l app=messaging-app
+
+echo "📜 Fetching GREEN deployment logs..."
+GREEN_POD=$(kubectl get pods -l app=messaging-app,version=green -o jsonpath='{.items[0].metadata.name}')
+kubectl logs "$GREEN_POD"
+
+echo "✅ If green logs show no errors, switch traffic with:"
+echo "kubectl patch service messaging-app-service -p '{\"spec\":{\"selector\":{\"app\":\"messaging-app\",\"version\":\"green\"}}}'"
+
+echo "🔁 To rollback to BLUE:"
+echo "kubectl patch service messaging-app-service -p '{\"spec\":{\"selector\":{\"app\":\"messaging-app\",\"version\":\"blue\"}}}'"
+
+echo "🎉 Blue-Green deployment process complete!"
