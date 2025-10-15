@@ -9,7 +9,7 @@ echo "🟦 Deploying BLUE version..."
 kubectl apply -f blue_deployment.yaml
 
 echo "🟩 Deploying GREEN version..."
-kubectl apply -f green_deployment.yaml
+kubectl apply -f messaging_app/green_deployment.yaml
 
 echo "🧱 Ensuring service exists..."
 kubectl apply -f kubeservice.yaml

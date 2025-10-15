@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# kubctl-0x03
+# Purpose: Perform rolling update for blue deployment and monitor uptime.
+
+DEPLOYMENT_FILE="messaging_app/blue_deployment.yaml"
+SERVICE_URL="http://messaging.local"  # Replace if using a different host or port
+NAMESPACE="default"
+
+echo "🔄 Applying updated deployment file..."
+kubectl apply -f $DEPLOYMENT_FILE
+
+echo "🚀 Triggering rolling update..."
+kubectl rollout restart deployment messaging-app-blue -n $NAMESPACE
+
+echo "⏳ Monitoring rollout status..."
+kubectl rollout status deployment messaging-app-blue -n $NAMESPACE
+
+echo "🌐 Testing service availability during rollout..."
+for i in {1..30}; do
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" $SERVICE_URL)
+  if [ "$STATUS" -eq 200 ]; then
+    echo "[$i] ✅ App responding (HTTP 200)"
+  else
+    echo "[$i] ⚠️ App not responding (HTTP $STATUS)"
+  fi
+  sleep 2
+done
+
+echo "📋 Checking running pods..."
+kubectl get pods -l app=messaging-app -n $NAMESPACE --show-labels
+
+echo "✅ Rolling update process complete!"
