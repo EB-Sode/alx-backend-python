@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'     // Use Python 3.10 Docker image
-            args '-u root'          // Run as root to avoid permission issues
+            image 'python:3.10'
+            args '-u root'
         }
     }
 
@@ -14,8 +14,10 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                echo 'Cloning repository...'
-                git branch: 'main', url: 'https://github.com/EB-Sode/alx-backend-python.git'
+                echo 'Cloning repository from GitHub...'
+                git branch: 'main', 
+                    url: 'https://github.com/EB-Sode/alx-backend-python.git',
+                    credentialsId: 'github-credentials'  // <-- Add your Jenkins credentials ID here
                 dir('messaging_app') {
                     echo 'Using messaging_app subdirectory...'
                 }
@@ -67,4 +69,3 @@ pipeline {
         }
     }
 }
-
