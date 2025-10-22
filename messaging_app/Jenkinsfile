@@ -15,7 +15,8 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 echo 'Cloning repository...'
-                git branch: 'main', url: 'https://github.com/EB-Sode/alx-backend-python.git'
+                git branch: 'main', url: 'https://github.com/EB-Sode/alx-backend-python.git',
+                credentialsId: 'github-credentials'
                 dir('messaging_app') {
                     echo 'Using messaging_app subdirectory...'
                 }
