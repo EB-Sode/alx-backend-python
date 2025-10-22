@@ -1,0 +1,70 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.10'     // Use Python 3.10 Docker image
+            args '-u root'          // Run as root to avoid permission issues
+        }
+    }
+
+    environment {
+        REPORT_DIR = 'reports'
+        REPORT_FILE = "${REPORT_DIR}/test-results.xml"
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                echo 'Cloning repository...'
+                git branch: 'main', url: 'https://github.com/EB-Sode/alx-backend-python.git'
+                dir('messaging_app') {
+                    echo 'Using messaging_app subdirectory...'
+                }
+            }
+        }
+
+        stage('Set Up Environment') {
+            steps {
+                dir('messaging_app') {
+                    echo 'Installing dependencies...'
+                    sh 'pip install --upgrade pip'
+                    sh 'pip install -r requirements.txt'
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                dir('messaging_app') {
+                    echo 'Running pytest with JUnit XML report...'
+                    sh '''
+                        mkdir -p ${REPORT_DIR}
+                        pytest --junitxml=${REPORT_FILE} || true
+                    '''
+                }
+            }
+        }
+
+        stage('Publish Test Report') {
+            steps {
+                dir('messaging_app') {
+                    junit allowEmptyResults: true, testResults: "${REPORT_FILE}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir('messaging_app') {
+                archiveArtifacts artifacts: "${REPORT_FILE}", fingerprint: true
+            }
+        }
+        success {
+            echo '✅ Tests passed successfully!'
+        }
+        failure {
+            echo '❌ Some tests failed. Check the report for details.'
+        }
+    }
+}
+
