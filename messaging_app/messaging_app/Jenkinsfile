@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        REPORT_DIR = 'reports'
+        REPORT_DIR = 'messaging_app/reports'
         REPORT_FILE = "${REPORT_DIR}/test-results.xml"
     }
 
@@ -15,57 +15,52 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 echo 'Cloning repository from GitHub...'
-                git branch: 'main', 
+                git branch: 'main',
                     url: 'https://github.com/EB-Sode/alx-backend-python.git',
-                    credentialsId: 'github-credentials'  // <-- Add your Jenkins credentials ID here
+                    credentialsId: 'github-credentials'
                 dir('messaging_app') {
                     echo 'Using messaging_app subdirectory...'
                 }
             }
         }
 
-        stage('Set Up Environment') {
+        stage('Install Dependencies') {
             steps {
-                dir('messaging_app') {
-                    echo 'Installing dependencies...'
-                    sh 'pip install --upgrade pip'
-                    sh 'pip install -r requirements.txt'
-                }
+                echo 'Installing Python dependencies...'
+                sh '''
+                    pip3 install --upgrade pip
+                    pip3 install -r messaging_app/requirements.txt
+                '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                dir('messaging_app') {
-                    echo 'Running pytest with JUnit XML report...'
-                    sh '''
-                        mkdir -p ${REPORT_DIR}
-                        pytest --junitxml=${REPORT_FILE} || true
-                    '''
-                }
+                echo 'Running pytest and generating JUnit XML report...'
+                sh '''
+                    mkdir -p ${REPORT_DIR}
+                    pytest messaging_app/tests --junitxml=${REPORT_FILE} || true
+                '''
             }
         }
 
         stage('Publish Test Report') {
             steps {
-                dir('messaging_app') {
-                    junit allowEmptyResults: true, testResults: "${REPORT_FILE}"
-                }
+                junit allowEmptyResults: true, testResults: "${REPORT_FILE}"
             }
         }
     }
 
     post {
         always {
-            dir('messaging_app') {
-                archiveArtifacts artifacts: "${REPORT_FILE}", fingerprint: true
-            }
+            echo 'Archiving test report artifacts...'
+            archiveArtifacts artifacts: "${REPORT_FILE}", fingerprint: true
         }
         success {
-            echo '✅ Tests passed successfully!'
+            echo '✅ All tests passed successfully!'
         }
         failure {
-            echo '❌ Some tests failed. Check the report for details.'
+            echo '❌ Tests failed. Check the report for details.'
         }
     }
 }
