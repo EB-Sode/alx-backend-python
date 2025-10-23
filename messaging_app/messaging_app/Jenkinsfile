@@ -30,8 +30,8 @@ pipeline {
             steps {
                 echo 'Installing Python dependencies...'
                 sh '''
-                    pip3 install --upgrade pip
-                    pip3 install -r messaging_app/requirements.txt
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
                 '''
             }
         }
@@ -41,17 +41,17 @@ pipeline {
                 echo 'Running pytest and generating JUnit XML report...'
                 sh '''
                     mkdir -p ${REPORT_DIR}
-                    pytest messaging_app/tests --junitxml=${REPORT_FILE} || true
+                    pytest ${APP_DIR}/tests --junitxml=${REPORT_FILE} || true
                 '''
             }
         }
 
         stage('Publish Test Report') {
             steps {
+                echo '📊 Publishing test results...'
                 junit allowEmptyResults: true, testResults: "${REPORT_FILE}"
             }
         }
-
         stage('Build Docker Image') {
             when {
                 expression { currentBuild.currentResult == 'SUCCESS' }
