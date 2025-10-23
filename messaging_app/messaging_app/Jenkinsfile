@@ -9,6 +9,8 @@ pipeline {
     environment {
         REPORT_DIR = 'messaging_app/reports'
         REPORT_FILE = "${REPORT_DIR}/test-results.xml"
+        DOCKER_IMAGE = 'your-dockerhub-username/messaging_app'
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials' 
     }
 
     stages {
@@ -51,16 +53,49 @@ pipeline {
         }
     }
 
+            stage('Build Docker Image') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo 'Building Docker image for messaging_app...'
+                script {
+                    def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    sh "docker build -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:${commitHash} -f messaging_app/Dockerfile ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo 'Pushing Docker image to Docker Hub...'
+                script {
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", passwordVariable: 'DOCKER_PASS', usernameVariable: 'DOCKER_USER')]) {
+                        sh '''
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                            docker push ${DOCKER_IMAGE}:latest
+                            docker push ${DOCKER_IMAGE}:$(git rev-parse --short HEAD)
+                            docker logout
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
     post {
         always {
             echo 'Archiving test report artifacts...'
             archiveArtifacts artifacts: "${REPORT_FILE}", fingerprint: true
         }
         success {
-            echo '✅ All tests passed successfully!'
+            echo '✅ Build, Test, and Docker pushed successfully!'
         }
         failure {
-            echo '❌ Tests failed. Check the report for details.'
+            echo '❌ Build failed. Check logs for errors.'
         }
     }
 }
